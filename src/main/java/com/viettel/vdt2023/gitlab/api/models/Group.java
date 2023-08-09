@@ -3,10 +3,14 @@ package com.viettel.vdt2023.gitlab.api.models;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.viettel.vdt2023.gitlab.api.utils.JacksonJson;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 import java.util.List;
 
+@AllArgsConstructor
+@NoArgsConstructor
 public class Group extends AbstractGroup<Group> {
 
     public class Statistics {
