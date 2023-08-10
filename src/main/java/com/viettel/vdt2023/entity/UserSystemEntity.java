@@ -10,10 +10,9 @@ import lombok.*;
 @Getter
 @Setter
 @Table(name="user_system")
-public class UserSytemEntity {
+public class UserSystemEntity {
 
     @Id
-    @Generated
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

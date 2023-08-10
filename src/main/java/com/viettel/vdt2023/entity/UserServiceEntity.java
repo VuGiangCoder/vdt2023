@@ -13,7 +13,6 @@ import lombok.*;
 public class UserServiceEntity {
 
     @Id
-    @Generated
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 

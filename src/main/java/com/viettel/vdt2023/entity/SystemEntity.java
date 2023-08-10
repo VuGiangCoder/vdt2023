@@ -15,11 +15,8 @@ import java.util.Set;
 public class SystemEntity {
 
     @Id
-    @Generated
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
-
+    private Long gitlabId;
 }

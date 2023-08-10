@@ -9,17 +9,16 @@ import lombok.*;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name="_service")
+@Table(name = "_service")
 public class ServiceEntity {
 
     @Id
-    @Generated
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String name;
-
-    private Long systemId;
-
+    @ManyToOne
+    @JoinColumn(name = "systemId")
+    private SystemEntity system;
+    private Long gitlabId;
 
 }

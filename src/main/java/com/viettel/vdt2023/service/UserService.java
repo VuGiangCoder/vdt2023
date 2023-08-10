@@ -16,5 +16,8 @@ public class UserService {
     public UserEntity loadUserByUsername(String username){
         return userRepository.findByUsername(username);
     }
+    public void saveUser(UserEntity userEntity){
+        userRepository.save(userEntity);
+    }
 
 }
