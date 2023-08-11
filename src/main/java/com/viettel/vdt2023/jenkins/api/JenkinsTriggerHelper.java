@@ -64,7 +64,6 @@ public class JenkinsTriggerHelper {
         return triggerJobAndWaitUntilFinished(jobName, queueRef);
     }
 
-
     private BuildWithDetails triggerJobAndWaitUntilFinished(String jobName, QueueReference queueRef)
             throws IOException, InterruptedException {
         JobWithDetails job = this.server.getJob(jobName);
