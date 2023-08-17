@@ -1,0 +1,70 @@
+<?xml version='1.1' encoding='UTF-8'?>
+<flow-definition plugin="workflow-job@2.40">
+    <actions>
+        <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction
+                plugin="pipeline-model-definition@1.11.2"/>
+    </actions>
+    <description></description>
+    <keepDependencies>false</keepDependencies>
+    <properties>
+        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+            <triggers>
+                <hudson.triggers.TimerTrigger>
+                    <!--                    <spec>H/5 * * * *</spec>-->
+                </hudson.triggers.TimerTrigger>
+            </triggers>
+        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
+    </properties>
+    <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.86">
+        <script>
+            pipeline{
+                agent any
+                environment {
+                    registry = "vugiangcoder/test-build"
+                    registryCredential = "dockerhub"
+                    dockerImage = ""
+                }
+                stages{
+                    stage("Clone Git repository"){
+                        steps{
+                            git(
+                                url:"https://gitlab.com/VuGiangCoder/microservice-deploy.git",
+                                branch: "main",
+                                changelog: true,
+                                poll: true
+                            )
+
+                        }
+                    }
+                    stage("Build image"){
+                        steps{
+                            script{
+                                dockerImage=docker.build registry + ":latest"
+                            }
+                        }
+                    }
+                    stage("Push image to Docker Hub"){
+                        steps{
+                            script{
+                                docker.withRegistry( "", registryCredential){
+                                dockerImage.push()
+                            }
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+            // Dọn dẹp sau khi pipeline hoàn thành (tuỳ chọn, bạn có thể bỏ đi nếu không cần)
+                    script {
+                        dockerImage.clean()
+                    }
+                }
+            }
+            }
+        </script>
+        <sandbox>true</sandbox>
+    </definition>
+    <triggers/>
+    <disabled>false</disabled>
+</flow-definition>
