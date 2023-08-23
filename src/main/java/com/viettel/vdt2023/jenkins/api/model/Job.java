@@ -57,6 +57,18 @@ public class Job extends BaseModel {
         return client.get(url, JobWithDetails.class);
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
+
     /**
      * Get a file from workspace.
      * 

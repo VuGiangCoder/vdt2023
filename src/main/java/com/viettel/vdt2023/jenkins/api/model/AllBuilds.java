@@ -8,14 +8,6 @@ package com.viettel.vdt2023.jenkins.api.model;
 
 import java.util.List;
 
-/**
- * This class is only needed to get all builds in
- * {@link JobWithDetails#getAllBuilds()}.
- * 
- * @author Karl Heinz Marbaise
- *
- *         NOTE: This class is not part of any public API
- */
 class AllBuilds extends BaseModel {
     private List<Build> allBuilds;
 

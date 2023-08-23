@@ -10,6 +10,7 @@ import com.viettel.vdt2023.gitlab.api.models.Group;
 import com.viettel.vdt2023.gitlab.api.models.Project;
 import com.viettel.vdt2023.gitlab.api.models.Visibility;
 import com.viettel.vdt2023.jenkins.api.JenkinsServer;
+import com.viettel.vdt2023.jenkins.api.model.Job;
 import com.viettel.vdt2023.jwt.JwtTokenProvider;
 import com.viettel.vdt2023.service.*;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 
 import static java.lang.Thread.sleep;
@@ -54,7 +58,7 @@ public class CentralizestorageController {
         GroupApi groupApi = new GroupApi(gitLabApi);
         Group group = groupApi.addGroup(createSystemRequestEntity.getName(), createSystemRequestEntity.getName(),
                 createSystemRequestEntity.getDecription(), Visibility.PRIVATE, true, true,
-                36L);
+                73L);
         SystemEntity systemEntity = new SystemEntity(null, createSystemRequestEntity.getName(), group.getId());
         System.out.println(systemEntity);
         try {
@@ -109,6 +113,7 @@ public class CentralizestorageController {
         if (!jwtTokenProvider.validateToken(token)) {
             return null;
         }
+        String jenins_token = "11404cc9a1fd9088daf541b548fd6ac68b";
         GitLabApi gitLabApi = GitLabApi.oauth2Login("http://192.168.56.1:80", "root",
                 "12345678");
         GroupApi groupApi = new GroupApi(gitLabApi);
@@ -137,21 +142,33 @@ public class CentralizestorageController {
                 UserServiceEntity userServiceEntity = new UserServiceEntity(null, userEntity, serviceEntity, true);
                 userServiceService.saveUserService(userServiceEntity);
                 System.out.println(userServiceEntity);
-                Project sourceCodeRepo = projectApi.createProject(childGroup.getId(), createServiceRequestEntity.getName() + "sourcecode");
-                String pathSourceCode = "http://192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
-                        + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getName() + "sourcecode ";
-                String imageNameSourceCode = createServiceRequestEntity.getName() + createServiceRequestEntity.getParentGroupName() + "SourceCode";
+                Project sourceCodeRepo = projectApi.createProject(childGroup.getId(), createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "sourcecode");
+                String pathSourceCode = "http://root:L8uX4Y3zsEstqPXAfy9o@192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
+                        + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "sourcecode ";
+                String imageNameSourceCode = createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "sourcecode";
                 String jenkins_script_pipeline_sourceCode = createJenkinsJob(pathSourceCode, imageNameSourceCode);
-                JenkinsServer jenkins = new JenkinsServer(new URI("http://192.168.56.1:1234"), "minhgiang89", "giang2010gc@");
-                jenkins.createJob(imageNameSourceCode, jenkins_script_pipeline_sourceCode, true);
-                Project dependencyRepo = projectApi.createProject(childGroup.getId(), createServiceRequestEntity.getName() + "dependency");
-                String pathDepend = "http://192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
-                        + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getName() + "dependency";
-                String imageNameDepend = createServiceRequestEntity.getName() + createServiceRequestEntity.getParentGroupName() + "Dependency";
+                JenkinsServer jenkins = new JenkinsServer(new URI("http://localhost:1234"), "minhgiang89", "giang2010gc@");
+                jenkins.createJob(imageNameSourceCode, createJenkinsJobPro(), true);
+                Job job = jenkins.getJob(imageNameSourceCode);
+                job.build(true);
+                sleep(3000);
+                jenkins.updateJob(imageNameSourceCode, jenkins_script_pipeline_sourceCode, true);
+                projectApi.addHook(sourceCodeRepo, "http://minhgiang89:" + jenins_token + "@192.168.56.1:1234/project/"
+                        + imageNameSourceCode, true, true, true);
+                Project dependencyRepo = projectApi.createProject(childGroup.getId(), createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency");
+                String pathDepend = "http://root:L8uX4Y3zsEstqPXAfy9o@192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
+                        + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency";
+                String imageNameDepend = createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency";
                 String jenkins_script_pipeline_depend = createJenkinsJob(pathDepend, imageNameDepend);
-                jenkins.createJob(imageNameDepend, jenkins_script_pipeline_depend, true);
-                String link = "Link source code: " + pathSourceCode + "\n"
-                        + "Link dependency: " + pathDepend;
+                jenkins.createJob(imageNameDepend, createJenkinsJobPro(), true);
+                job.build(true);
+                jenkins.updateJob(imageNameDepend, jenkins_script_pipeline_depend, true);
+                projectApi.addHook(dependencyRepo, "http://minhgiang89:" + jenins_token + "@192.168.56.1:1234/project/"
+                        + imageNameDepend, true, true, true);
+                String link = "Link source code: " + "http://192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
+                        + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "sourcecode\n"
+                        + "Link dependency: " + "http://192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
+                        + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency";
                 return link;
             }
 
@@ -223,7 +240,19 @@ public class CentralizestorageController {
                 "    </properties>\n" +
                 "    <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition\" plugin=\"workflow-cps@2.86\">\n" +
                 "    <script>\n" +
-                "        pipeline{\n" +
+                "       properties([\n" +
+                "           gitLabConnection('" + path + "'),\n" +
+                "           pipelineTriggers([\n" +
+                "               [\n" +
+                "                   $class               : 'GitLabPushTrigger',\n" +
+                "                   triggerOnPush        : true,\n" +
+                "                   triggerOnMergeRequest: true,\n" +
+                "               ]\n" +
+                "           ]),\n" +
+                "           disableConcurrentBuilds(),\n" +
+                "           overrideIndexTriggers(false)\n" +
+                "      ])\n" +
+                "      pipeline{\n" +
                 "            agent any\n" +
                 "            environment {\n" +
                 "                registry = \"vugiangcoder/" + imageName + "\"\n" +
@@ -239,7 +268,6 @@ public class CentralizestorageController {
                 "                            changelog: true,\n" +
                 "                            poll: true\n" +
                 "                        )\n" +
-                "\n" +
                 "                    }\n" +
                 "                }\n" +
                 "                stage(\"Build image\"){\n" +
@@ -259,16 +287,16 @@ public class CentralizestorageController {
                 "                }\n" +
                 "            }\n" +
                 "        }\n" +
-                "        post {\n" +
-                "            always {\n" +
-                "                script {\n" +
-                "                    dockerImage.clean()\n" +
-                "                }\n" +
-                "            }\n" +
-                "        }\n" +
+//                "        post {\n" +
+//                "            always {\n" +
+//                "                script {\n" +
+//                "                    dockerImage.clean()\n" +
+//                "                }\n" +
+//                "            }\n" +
+//                "        }\n" +
                 "        }\n" +
                 "    </script>\n" +
-                "        <sandbox>true</sandbox>\n" +
+                "    <sandbox>true</sandbox>\n" +
                 "    </definition>\n" +
                 "    <triggers />\n" +
                 "    <disabled>false</disabled>\n" +
@@ -276,4 +304,10 @@ public class CentralizestorageController {
         return jenkin_pipeline_script;
     }
 
+    public String createJenkinsJobPro() throws IOException {
+        String filePathPro = "D:\\vdt2023\\src\\main\\resources\\configPro.xml";
+        byte[] bytePro = Files.readAllBytes(Paths.get(filePathPro));
+        String jobXmlPro = new String(bytePro);
+        return jobXmlPro;
+    }
 }

@@ -451,18 +451,7 @@ public class BuildWithDetails extends Build {
     }
 
 
-  /**
-   * Returns the change set of a build if available.
-   * 
-   * If a build performs several scm checkouts (i.e. pipeline builds), the change set of the first
-   * checkout is returned. To get the complete list of change sets for all checkouts, use
-   * {@link #getChangeSets()}
-   * 
-   * If no checkout is performed, null is returned.
-   * 
-   * @return The change set of the build.
-   * 
-   */
+
     public BuildChangeSet getChangeSet() {
         BuildChangeSet result;
         if (changeSet != null) {
@@ -480,12 +469,7 @@ public class BuildWithDetails extends Build {
         return this;
     }
 
-  /**
-   * Returns the complete list of change sets for all checkout the build has performed. If no
-   * checkouts have been performed, returns null.
-   * 
-   * @return The complete list of change sets of the build.
-   */
+
     public List<BuildChangeSet> getChangeSets() {
         List<BuildChangeSet> result;
         if (changeSets != null) {
@@ -526,14 +510,6 @@ public class BuildWithDetails extends Build {
                 "");
         return client.getFile(artifactUri);
     }
-    
-    /**
-     * Returns {@link MavenModuleWithDetails} based on its name
-     * 
-     * @param name module name
-     * @return {@link MavenModuleWithDetails}
-     * @throws IOException in case of error.
-     */
     public MavenModuleWithDetails getModule(String name) throws IOException {
         return client.get(getUrl() + name, MavenModuleWithDetails.class);
     }    

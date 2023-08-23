@@ -2184,13 +2184,11 @@ public class ProjectApi extends AbstractApi implements Constants {
      */
     public ProjectHook addHook(Object projectIdOrPath, String url, boolean doPushEvents,
             boolean doIssuesEvents, boolean doMergeRequestsEvents) throws GitLabApiException {
-
         GitLabApiForm formData = new GitLabApiForm()
                 .withParam("url", url)
                 .withParam("push_events", doPushEvents)
                 .withParam("issues_events", doIssuesEvents)
                 .withParam("merge_requests_events", doMergeRequestsEvents);
-
         Response response = post(Response.Status.CREATED, formData, "projects", getProjectIdOrPath(projectIdOrPath), "hooks");
         return (response.readEntity(ProjectHook.class));
     }

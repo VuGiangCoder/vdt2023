@@ -9,12 +9,12 @@ public class BuildChangeSetItem {
 
     private List<String> affectedPaths;
     private String commitId;
-    private String timestamp; // May be we should date/?
+    private String timestamp;
     private BuildChangeSetAuthor author;
     private String comment;
-    private String date; // Better use Date
-    private String id; // seemed to be the same as the commitId?
-    private String msg; // Message difference to comment?
+    private String date;
+    private String id;
+    private String msg;
     private List<BuildChangeSetPath> paths;
 
     public List<String> getAffectedPaths() {

@@ -2,27 +2,15 @@ package com.viettel.vdt2023.jenkins.api.model;
 
 public class BuildChangeSetPath {
 
-    /**
-     * The SCM operation, <code>add</code> or <code>edit</code> or <code>delete</code>
-     * @see <a href="http://javadoc.jenkins.io/hudson/scm/EditType.html">EditType</a>
-     */
+
     private String editType;
     private String file;
 
-    /**
-     * Return the SCM operation.
-     * @return the SCM operation, <code>add</code> or <code>edit</code> or <code>delete</code>
-     * @see <a href="http://javadoc.jenkins.io/hudson/scm/EditType.html">EditType</a>
-     */
+
     public String getEditType() {
         return editType;
     }
 
-    /**
-     * Sets the SCM operation.
-     * @param editType the SCM operation, <code>add</code> or <code>edit</code> or <code>delete</code>
-     * @see <a href="http://javadoc.jenkins.io/hudson/scm/EditType.html">EditType</a>
-     */
     public BuildChangeSetPath setEditType(String editType) {
         this.editType = editType;
         return this;

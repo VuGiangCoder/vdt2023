@@ -6,17 +6,30 @@
     </actions>
     <description></description>
     <keepDependencies>false</keepDependencies>
-    <properties>
-        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
-            <triggers>
-                <hudson.triggers.TimerTrigger>
-                    <!--                    <spec>H/5 * * * *</spec>-->
-                </hudson.triggers.TimerTrigger>
-            </triggers>
-        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>
-    </properties>
+
+<!--    <project>-->
+<!--        <triggers>-->
+<!--            <org.jenkinsci.plugins.gogs.GogsTrigger plugin="gogs-webhook@1.4">-->
+<!--                <triggerOnPush>true</triggerOnPush>-->
+<!--                <triggerOnNote>true</triggerOnNote>-->
+<!--                <triggerOnMergeRequest>true</triggerOnMergeRequest>-->
+<!--            </org.jenkinsci.plugins.gogs.GogsTrigger>-->
+<!--        </triggers>-->
+<!--    </project>-->
     <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@2.86">
         <script>
+            properties([
+                gitLabConnection("http://root:L8uX4Y3zsEstqPXAfy9o@192.168.56.1:80/viettel-vdt2023/test1/test1/test1test1sourcecode"),
+                pipelineTriggers([
+                    [
+                        $class               : "GitLabPushTrigger",
+                        triggerOnPush        : true,
+                        triggerOnMergeRequest: true,
+                    ]
+                ]),
+                disableConcurrentBuilds(),
+                overrideIndexTriggers(false)
+            ])
             pipeline{
                 agent any
                 environment {
@@ -28,36 +41,28 @@
                     stage("Clone Git repository"){
                         steps{
                             git(
-                                url:"https://gitlab.com/VuGiangCoder/microservice-deploy.git",
+                                url:"http://root:L8uX4Y3zsEstqPXAfy9o@192.168.56.1:80/viettel-vdt2023/test1/test1/test1test1sourcecode",
                                 branch: "main",
                                 changelog: true,
                                 poll: true
                             )
 
                         }
-                    }
-                    stage("Build image"){
-                        steps{
-                            script{
-                                dockerImage=docker.build registry + ":latest"
-                            }
-                        }
-                    }
-                    stage("Push image to Docker Hub"){
-                        steps{
-                            script{
-                                docker.withRegistry( "", registryCredential){
-                                dockerImage.push()
-                            }
+                 }
+                stage("Build image"){
+                    steps{
+                        script{
+                            dockerImage=docker.build registry + ":latest"
                         }
                     }
                 }
-            }
-            post {
-                always {
-            // Dọn dẹp sau khi pipeline hoàn thành (tuỳ chọn, bạn có thể bỏ đi nếu không cần)
-                    script {
-                        dockerImage.clean()
+                stage("Push image to Docker Hub"){
+                    steps{
+                        script{
+                            docker.withRegistry( "", registryCredential){
+                                dockerImage.push()
+                            }
+                        }
                     }
                 }
             }
