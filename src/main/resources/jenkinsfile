@@ -10,7 +10,7 @@
                 stage("Clone Git repository"){
                     steps{
                         git(
-                            url:"https://gitlab.com/VuGiangCoder/microservice-deploy.git",
+                            url:"https://gitlab.com/VuGiangCoder/deploy.git",
                             branch: "main",
                             changelog: true,
                             poll: true
@@ -31,22 +31,31 @@
                     }
                 }
                 stage("Push image to Docker Hub"){
-                steps{
-                    script{
-                        docker.withRegistry( "", registryCredential){
-                            dockerImage.push()
+                    steps{
+                        script{
+                            docker.withRegistry( "", registryCredential){
+                                dockerImage.push()
+                            }
                         }
                     }
                 }
+                stage('Deploy') {
+                            steps {
+                                dir('sourcecode'){
+                                    script {
+                                        kubernetesDeploy(configs: "deployment.yaml", "deployment-service.yaml")
+                                    }
+                                }
+                            }
+                        }
             }
-        }
-        post {
-            always {
-                // Dọn dẹp sau khi pipeline hoàn thành (tuỳ chọn, bạn có thể bỏ đi nếu không cần)
-                script {
-                    dockerImage.clean()
+            post {
+                always {
+                    // Dọn dẹp sau khi pipeline hoàn thành (tuỳ chọn, bạn có thể bỏ đi nếu không cần)
+                    script {
+                        dockerImage.clean()
+                    }
                 }
             }
-        }
         }
     </script>

@@ -58,7 +58,7 @@ public class CentralizestorageController {
         GroupApi groupApi = new GroupApi(gitLabApi);
         Group group = groupApi.addGroup(createSystemRequestEntity.getName(), createSystemRequestEntity.getName(),
                 createSystemRequestEntity.getDecription(), Visibility.PRIVATE, true, true,
-                73L);
+                161L);
         SystemEntity systemEntity = new SystemEntity(null, createSystemRequestEntity.getName(), group.getId());
         System.out.println(systemEntity);
         try {
@@ -75,8 +75,8 @@ public class CentralizestorageController {
     }
 
     @PostMapping("/api/add-member-system")
-    public String addMemberToSystem(@RequestBody AddMemberSystemRequestEntity addMemberSystemRequest,
-                                    @RequestHeader("Authorization") String authToken) throws GitLabApiException {
+    public void addMemberToSystem(@RequestBody AddMemberSystemRequestEntity addMemberSystemRequest,
+                                  @RequestHeader("Authorization") String authToken) throws GitLabApiException {
         String token = authToken.substring(7);
         String name = jwtTokenProvider.getUsernameFromJWT(token);
         UserEntity userEn = userService.loadUserByUsername(name);
@@ -87,7 +87,7 @@ public class CentralizestorageController {
         SystemEntity systemEn = systemService.loadSystemByName(addMemberSystemRequest.getGroupname());
         UserSystemEntity userSystemEn = userSystemService.loadUserSystem(userEn, systemEn);
         if (userSystemEn == null) {
-            return "Denied";
+            System.out.println("Denied");
         }
         Group group = groupApi.getGroup(systemEn.getGitlabId());
         System.out.println(group);
@@ -100,10 +100,10 @@ public class CentralizestorageController {
                 UserSystemEntity userSystemEntity = new UserSystemEntity(null, userEntity, systemEn, false);
                 userSystemService.saveUserSystem(userSystemEntity);
             } catch (Exception e) {
-                return "them " + username + " khong thanh cong";
+                String message = "them " + username + " khong thanh cong";
+                System.out.println(message);
             }
         }
-        return null;
     }
 
     @PostMapping("/api/create-service")
@@ -145,42 +145,36 @@ public class CentralizestorageController {
                 Project sourceCodeRepo = projectApi.createProject(childGroup.getId(), createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "sourcecode");
                 String pathSourceCode = "http://root:L8uX4Y3zsEstqPXAfy9o@192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
                         + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "sourcecode ";
-                String imageNameSourceCode = createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "sourcecode";
-                String jenkins_script_pipeline_sourceCode = createJenkinsJob(pathSourceCode, imageNameSourceCode);
-                JenkinsServer jenkins = new JenkinsServer(new URI("http://localhost:1234"), "minhgiang89", "giang2010gc@");
-                jenkins.createJob(imageNameSourceCode, createJenkinsJobPro(), true);
-                Job job = jenkins.getJob(imageNameSourceCode);
-                job.build(true);
-                sleep(3000);
-                jenkins.updateJob(imageNameSourceCode, jenkins_script_pipeline_sourceCode, true);
-                projectApi.addHook(sourceCodeRepo, "http://minhgiang89:" + jenins_token + "@192.168.56.1:1234/project/"
-                        + imageNameSourceCode, true, true, true);
+                String imageName = createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName();
+
                 Project dependencyRepo = projectApi.createProject(childGroup.getId(), createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency");
                 String pathDepend = "http://root:L8uX4Y3zsEstqPXAfy9o@192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
                         + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency";
-                String imageNameDepend = createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency";
-                String jenkins_script_pipeline_depend = createJenkinsJob(pathDepend, imageNameDepend);
-                jenkins.createJob(imageNameDepend, createJenkinsJobPro(), true);
+                String nameDepend = createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName();
+                String jenkins_script_pipeline_sourceCode = createJenkinsJob(pathSourceCode, pathDepend, imageName);
+                JenkinsServer jenkins = new JenkinsServer(new URI("http://localhost:1234"), "minhgiang89", "giang2010gc@");
+                jenkins.createJob(imageName, createJenkinsJobPro(), true);
+                Job job = jenkins.getJob(imageName);
                 job.build(true);
-                jenkins.updateJob(imageNameDepend, jenkins_script_pipeline_depend, true);
+                sleep(10000);
+                jenkins.updateJob(imageName, jenkins_script_pipeline_sourceCode, true);
                 projectApi.addHook(dependencyRepo, "http://minhgiang89:" + jenins_token + "@192.168.56.1:1234/project/"
-                        + imageNameDepend, true, true, true);
+                        + imageName, true, true, true);
                 String link = "Link source code: " + "http://192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
                         + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "sourcecode\n"
                         + "Link dependency: " + "http://192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
                         + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency";
                 return link;
             }
-
         } catch (Exception e) {
-            System.out.println(e);
+            String message = "Thêm service không thành công";
+            return message;
         }
-        return "";
     }
 
     @PostMapping("/api/add-member-service")
-    public String addMemberToService(@RequestBody AddMemberServiceRequestEntity addMemberServiceRequest,
-                                     @RequestHeader("Authorization") String authToken) throws GitLabApiException {
+    public void addMemberToService(@RequestBody AddMemberServiceRequestEntity addMemberServiceRequest,
+                                   @RequestHeader("Authorization") String authToken) throws GitLabApiException {
         String token = authToken.substring(7);
         String name = jwtTokenProvider.getUsernameFromJWT(token);
         UserEntity userEn = userService.loadUserByUsername(name);
@@ -191,7 +185,7 @@ public class CentralizestorageController {
         ServiceEntity serviceEn = serviceService.loadServiceByName(addMemberServiceRequest.getGroupname());
         UserServiceEntity userServiceEn = userServiceService.loadUserService(userEn, serviceEn);
         if (userServiceEn == null) {
-            return "Denied";
+            System.out.println("Denied");
         }
         Group group = groupApi.getGroup(serviceEn.getGitlabId());
         System.out.println(group);
@@ -204,10 +198,9 @@ public class CentralizestorageController {
                 UserServiceEntity userServiceEntity = new UserServiceEntity(null, userEntity, serviceEn, false);
                 userServiceService.saveUserService(userServiceEntity);
             } catch (Exception e) {
-                return "them " + username + " khong thanh cong";
+                System.out.println("Thêm member vào service không thành công");
             }
         }
-        return null;
     }
 
     @GetMapping("/test")
@@ -226,7 +219,7 @@ public class CentralizestorageController {
         return jwtTokenProvider.generateToken(userDetail);
     }
 
-    public String createJenkinsJob(String path, String imageName) {
+    public String createJenkinsJob(String pathSourcode, String pathDepend, String imageName) {
         String jenkin_pipeline_script = "<?xml version='1.1' encoding='UTF-8'?>\n" +
                 "<flow-definition plugin=\"workflow-job@2.40\">\n" +
                 "    <actions>\n" +
@@ -240,61 +233,83 @@ public class CentralizestorageController {
                 "    </properties>\n" +
                 "    <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition\" plugin=\"workflow-cps@2.86\">\n" +
                 "    <script>\n" +
-                "       properties([\n" +
-                "           gitLabConnection('" + path + "'),\n" +
-                "           pipelineTriggers([\n" +
-                "               [\n" +
-                "                   $class               : 'GitLabPushTrigger',\n" +
-                "                   triggerOnPush        : true,\n" +
-                "                   triggerOnMergeRequest: true,\n" +
-                "               ]\n" +
-                "           ]),\n" +
-                "           disableConcurrentBuilds(),\n" +
-                "           overrideIndexTriggers(false)\n" +
-                "      ])\n" +
-                "      pipeline{\n" +
-                "            agent any\n" +
-                "            environment {\n" +
-                "                registry = \"vugiangcoder/" + imageName + "\"\n" +
-                "                registryCredential = \"dockerhub\"\n" +
-                "                dockerImage = \"\"\n" +
+                "properties([\n" +
+                "    gitLabConnection('http://root:L8uX4Y3zsEstqPXAfy9o@192.168.56.1:80/viettel-vdt2023/tv360/login/tv360loginsourcecode'),\n" +
+                "    pipelineTriggers([\n" +
+                "        [\n" +
+                "            $class: 'GitLabPushTrigger',\n" +
+                "            triggerOnPush: true,\n" +
+                "            triggerOnMergeRequest: true,\n" +
+                "        ]\n" +
+                "    ]),\n" +
+                "    disableConcurrentBuilds(),\n" +
+                "    overrideIndexTriggers(false)\n" +
+                "])\n" +
+                "\n" +
+                "pipeline {\n" +
+                "    agent any\n" +
+                "    environment {\n" +
+                "        registry = \"vugiangcoder/" + imageName + "\"\n" +
+                "        registryCredential = \"dockerhub_id\"\n" +
+                "        dockerImage = \"\"\n" +
+                "    }\n" +
+                "    stages {\n" +
+                "        stage(\"Clone kho Git\") {\n" +
+                "            steps {\n" +
+                "                dir(\"sourcecode\"){\n" +
+                "                git(\n" +
+                "                    url: \"" + pathSourcode + "\",\n" +
+                "                    branch: \"main\",\n" +
+                "                    changelog: true,\n" +
+                "                    poll: true\n" +
+                "                )\n" +
+                "                }\n" +
                 "            }\n" +
-                "            stages{\n" +
-                "                stage(\"Clone Git repository\"){\n" +
-                "                    steps{\n" +
-                "                        git(\n" +
-                "                            url:\"" + path + "\",\n" +
-                "                            branch: \"main\",\n" +
-                "                            changelog: true,\n" +
-                "                            poll: true\n" +
-                "                        )\n" +
-                "                    }\n" +
+                "        }\n" +
+                "        stage(\"Build d image\") {\n" +
+                "            steps {\n" +
+                "                dir(\"sourcecode\"){\n" +
+                "                script {\n" +
+                "                    dockerImage = docker.build registry + \":latest\"\n" +
                 "                }\n" +
-                "                stage(\"Build image\"){\n" +
-                "                    steps{\n" +
-                "                        script{\n" +
-                "                            dockerImage=docker.build registry + \":latest\"\n" +
-                "                        }\n" +
-                "                    }\n" +
                 "                }\n" +
-                "                stage(\"Push image to Docker Hub\"){\n" +
-                "                steps{\n" +
-                "                    script{\n" +
-                "                        docker.withRegistry( \"\", registryCredential){\n" +
-                "                            dockerImage.push()\n" +
-                "                        }\n" +
+                "            }\n" +
+                "        }\n" +
+                "        stage(\"Đẩy ảnh lên Docker Hub\") {\n" +
+                "            steps {\n" +
+                "                script {\n" +
+                "                    docker.withRegistry(\"\", registryCredential) {\n" +
+                "                        dockerImage.push()\n" +
                 "                    }\n" +
                 "                }\n" +
                 "            }\n" +
                 "        }\n" +
-//                "        post {\n" +
-//                "            always {\n" +
-//                "                script {\n" +
-//                "                    dockerImage.clean()\n" +
-//                "                }\n" +
-//                "            }\n" +
-//                "        }\n" +
+                "        stage(\"Clone kho Git phụ thuộc\") {\n" +
+                "            steps {\n" +
+                "                dir(\"depend\"){\n" +
+                "                git(\n" +
+                "                    url: \"" + pathDepend + "\",\n" +
+                "                    branch: \"main\",\n" +
+                "                    changelog: true,\n" +
+                "                    poll: true\n" +
+                "                )\n" +
+                "                }\n" +
+                "            }\n" +
                 "        }\n" +
+                "        stage(\"Triển khai tệp yaml lên Kubernetes\") {\n" +
+                "            steps {\n" +
+                "                dir(\"depend\") {\n" +
+                "                    withKubeConfig([\n" +
+                "                        credentialsId: \"config-jenkins-k8s\",\n" +
+                "                        serverUrl: \"https://127.0.0.1:55861\"\n" +
+                "                    ]) {\n" +
+                "                        bat \"kubectl apply -f deployment.yaml\"\n" +
+                "                    }\n" +
+                "                }\n" +
+                "            }\n" +
+                "        }\n" +
+                "    }\n" +
+                "}\n" +
                 "    </script>\n" +
                 "    <sandbox>true</sandbox>\n" +
                 "    </definition>\n" +

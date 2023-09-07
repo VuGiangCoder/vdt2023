@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserSystemService {
     private final UserSystemRepository userSystemRepository;
+
     public void saveUserSystem(UserSystemEntity userSystemEntity){
         userSystemRepository.save(userSystemEntity);
     }

@@ -1,9 +1,3 @@
-/*
- * Copyright (c) 2013 Cosmin Stejerean, Karl Heinz Marbaise, and contributors.
- *
- * Distributed under the MIT license: http://opensource.org/licenses/MIT
- */
-
 package com.viettel.vdt2023.jenkins.api.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
