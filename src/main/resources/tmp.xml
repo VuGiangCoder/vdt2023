@@ -49,6 +49,9 @@
                     <excludeBranchesSpec></excludeBranchesSpec>
                     <sourceBranchRegex></sourceBranchRegex>
                     <targetBranchRegex></targetBranchRegex>
+                    <!--
+                    <secretToken>{AQAAABAAAAAQ0xiOtix5Fr9D7eCix5cbp+TFDRRVtV4zcR7VklWbLl8=}</secretToken>
+                    -->
                     <pendingBuildName></pendingBuildName>
                     <cancelPendingBuildsOnUpdate>false</cancelPendingBuildsOnUpdate>
                 </com.dabsquared.gitlabjenkins.GitLabPushTrigger>
@@ -57,37 +60,52 @@
     </properties>
     <definition class="org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition" plugin="workflow-cps@3774.v4a_d648d409ce">
         <script>
-            pipeline{
+            pipeline {
             agent any
             environment {
-            registry = &quot;vugiangcoder/build-test&quot;
-            registryCredential = &quot;dockerhub&quot;
-            dockerImage = &quot;&quot;
+            registry = "vugiangcoder/build-test"
+            registryCredential = "dockerhub"
+            dockerImage = ""
             }
-            stages{
-            stage(&quot;Clone Git repository&quot;){
-            steps{
+            stages {
+            stage("Clone Git repository") {
+            steps {
+            dir("sourcecode") {
             git(
-            url:&quot;https://gitlab.com/VuGiangCoder/microservice-deploy.git&quot;,
-            branch: &quot;main&quot;,
+            url: "https://gitlab.com/VuGiangCoder/microservice-deploy.git",
+            branch: "main",
             changelog: true,
             poll: true
             )
-
-            }
-            }
-            stage(&quot;Build image&quot;){
-            steps{
-            script{
-            dockerImage=docker.build registry + &quot;:latest&quot;
             }
             }
             }
-            stage(&quot;Push image to Docker Hub&quot;){
-            steps{
-            script{
-            docker.withRegistry( &quot;&quot;, registryCredential){
+            stage("Build image") {
+            dir("sourcecoode") {
+            steps {
+            script {
+            dockerImage = docker.build registry + ":latest"
+            }
+            }
+            }
+            }
+            stage("Push image to Docker Hub") {
+            steps {
+            script {
+            docker.withRegistry("", registryCredential) {
             dockerImage.push()
+            }
+            }
+            }
+            }
+            stage("Deploy to k8s") {
+            steps {
+            dir("depend") {
+            withKubeConfig([
+            credentialsId: "config-jenkins-k8s",
+            serverUrl: "https://127.0.0.1:62426"
+            ]) {
+            bat "kubectl apply -f deployment.yaml"
             }
             }
             }

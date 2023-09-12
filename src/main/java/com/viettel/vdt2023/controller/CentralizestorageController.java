@@ -152,12 +152,10 @@ public class CentralizestorageController {
                         + "/" + createServiceRequestEntity.getName() + "/" + createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName() + "dependency";
                 String nameDepend = createServiceRequestEntity.getParentGroupName() + createServiceRequestEntity.getName();
                 String jenkins_script_pipeline_sourceCode = createJenkinsJob(pathSourceCode, pathDepend, imageName);
-                JenkinsServer jenkins = new JenkinsServer(new URI("http://localhost:1234"), "minhgiang89", "giang2010gc@");
-                jenkins.createJob(imageName, createJenkinsJobPro(), true);
-                Job job = jenkins.getJob(imageName);
-                job.build(true);
-                sleep(10000);
-                jenkins.updateJob(imageName, jenkins_script_pipeline_sourceCode, true);
+                JenkinsServer jenkins = new JenkinsServer(new URI("http://localhost:1234"), "minhgiang89", "1140fb4d62c3ef2cac6ffe07d17df34249");
+                jenkins.createJob(imageName, jenkins_script_pipeline_sourceCode, true);
+//                Job job = jenkins.getJob(imageName);
+//                job.build(true);
                 projectApi.addHook(dependencyRepo, "http://minhgiang89:" + jenins_token + "@192.168.56.1:1234/project/"
                         + imageName, true, true, true);
                 String link = "Link source code: " + "http://192.168.56.1:80/viettel-vdt2023/" + createServiceRequestEntity.getParentGroupName()
@@ -167,9 +165,9 @@ public class CentralizestorageController {
                 return link;
             }
         } catch (Exception e) {
-            String message = "Thêm service không thành công";
-            return message;
+            e.printStackTrace();
         }
+        return null;
     }
 
     @PostMapping("/api/add-member-service")
@@ -203,36 +201,83 @@ public class CentralizestorageController {
         }
     }
 
-    @GetMapping("/test")
-    public String generateJWT() {
-        UserEntity userEntity = new UserEntity(null, "vugiangcoder1", "abcdef", RoleEntity.ADMIN, 35L);
-        userService.saveUser(userEntity);
-        UserDetail userDetail = new UserDetail(userEntity);
-        return jwtTokenProvider.generateToken(userDetail);
-    }
+//    @GetMapping("/test")
+//    public String generateJWT() {
+//        UserEntity userEntity = new UserEntity(null, "vugiangcoder1", "abcdef", RoleEntity.ADMIN, 35L);
+//        userService.saveUser(userEntity);
+//        UserDetail userDetail = new UserDetail(userEntity);
+//        return jwtTokenProvider.generateToken(userDetail);
+//    }
+//
+//    @GetMapping("/test1")
+//    public String generateJWT1() {
+//        UserEntity userEntity = new UserEntity(null, "vugiangcoder2", "abcdef", RoleEntity.ADMIN, 36L);
+//        userService.saveUser(userEntity);
+//        UserDetail userDetail = new UserDetail(userEntity);
+//        return jwtTokenProvider.generateToken(userDetail);
+//    }
 
-    @GetMapping("/test1")
-    public String generateJWT1() {
-        UserEntity userEntity = new UserEntity(null, "vugiangcoder2", "abcdef", RoleEntity.ADMIN, 36L);
-        userService.saveUser(userEntity);
-        UserDetail userDetail = new UserDetail(userEntity);
-        return jwtTokenProvider.generateToken(userDetail);
-    }
-
+    @GetMapping()
     public String createJenkinsJob(String pathSourcode, String pathDepend, String imageName) {
         String jenkin_pipeline_script = "<?xml version='1.1' encoding='UTF-8'?>\n" +
-                "<flow-definition plugin=\"workflow-job@2.40\">\n" +
+                "<flow-definition plugin=\"workflow-job@1326.ve643e00e9220\">\n" +
                 "    <actions>\n" +
-                "        <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction plugin=\"pipeline-model-definition@1.11.2\" />\n" +
+                "        <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobAction\n" +
+                "                plugin=\"pipeline-model-definition@2.2144.v077a_d1928a_40\"/>\n" +
+                "        <org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction\n" +
+                "                plugin=\"pipeline-model-definition@2.2144.v077a_d1928a_40\">\n" +
+                "            <jobProperties/>\n" +
+                "            <triggers/>\n" +
+                "            <parameters/>\n" +
+                "            <options/>\n" +
+                "        </org.jenkinsci.plugins.pipeline.modeldefinition.actions.DeclarativeJobPropertyTrackerAction>\n" +
                 "    </actions>\n" +
-                "    <description></description>\n" +
+                "    <description>Chọn xây dựng khi có thay đổi được đẩy lên từ GitLab</description>\n" +
                 "    <keepDependencies>false</keepDependencies>\n" +
                 "    <properties>\n" +
+                "        <io.fabric8.jenkins.openshiftsync.BuildConfigProjectProperty plugin=\"openshift-sync@1.1.0.795.v95fa_27a_a_e287\">\n" +
+                "            <uid></uid>\n" +
+                "            <namespace></namespace>\n" +
+                "            <name></name>\n" +
+                "            <resourceVersion></resourceVersion>\n" +
+                "        </io.fabric8.jenkins.openshiftsync.BuildConfigProjectProperty>\n" +
+                "        <com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty plugin=\"gitlab-plugin@1.7.15\">\n" +
+                "            <gitLabConnection>my gitlab connect</gitLabConnection>\n" +
+                "            <jobCredentialId></jobCredentialId>\n" +
+                "            <useAlternativeCredential>false</useAlternativeCredential>\n" +
+                "        </com.dabsquared.gitlabjenkins.connection.GitLabConnectionProperty>\n" +
                 "        <org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>\n" +
+                "            <triggers>\n" +
+                "                <com.dabsquared.gitlabjenkins.GitLabPushTrigger plugin=\"gitlab-plugin@1.7.15\">\n" +
+                "                    <spec></spec>\n" +
+                "                    <triggerOnPush>true</triggerOnPush>\n" +
+                "                    <triggerToBranchDeleteRequest>false</triggerToBranchDeleteRequest>\n" +
+                "                    <triggerOnMergeRequest>true</triggerOnMergeRequest>\n" +
+                "                    <triggerOnlyIfNewCommitsPushed>false</triggerOnlyIfNewCommitsPushed>\n" +
+                "                    <triggerOnPipelineEvent>false</triggerOnPipelineEvent>\n" +
+                "                    <triggerOnAcceptedMergeRequest>false</triggerOnAcceptedMergeRequest>\n" +
+                "                    <triggerOnClosedMergeRequest>false</triggerOnClosedMergeRequest>\n" +
+                "                    <triggerOnApprovedMergeRequest>true</triggerOnApprovedMergeRequest>\n" +
+                "                    <triggerOpenMergeRequestOnPush>never</triggerOpenMergeRequestOnPush>\n" +
+                "                    <triggerOnNoteRequest>true</triggerOnNoteRequest>\n" +
+                "                    <noteRegex>Jenkins please retry a build</noteRegex>\n" +
+                "                    <ciSkip>true</ciSkip>\n" +
+                "                    <skipWorkInProgressMergeRequest>true</skipWorkInProgressMergeRequest>\n" +
+                "                    <labelsThatForcesBuildIfAdded></labelsThatForcesBuildIfAdded>\n" +
+                "                    <setBuildDescription>true</setBuildDescription>\n" +
+                "                    <branchFilterType>All</branchFilterType>\n" +
+                "                    <includeBranchesSpec></includeBranchesSpec>\n" +
+                "                    <excludeBranchesSpec></excludeBranchesSpec>\n" +
+                "                    <sourceBranchRegex></sourceBranchRegex>\n" +
+                "                    <targetBranchRegex></targetBranchRegex>\n" +
+                "                    <pendingBuildName></pendingBuildName>\n" +
+                "                    <cancelPendingBuildsOnUpdate>false</cancelPendingBuildsOnUpdate>\n" +
+                "                </com.dabsquared.gitlabjenkins.GitLabPushTrigger>\n" +
+                "            </triggers>\n" +
                 "        </org.jenkinsci.plugins.workflow.job.properties.PipelineTriggersJobProperty>\n" +
                 "    </properties>\n" +
-                "    <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition\" plugin=\"workflow-cps@2.86\">\n" +
-                "    <script>\n" +
+                "    <definition class=\"org.jenkinsci.plugins.workflow.cps.CpsFlowDefinition\" plugin=\"workflow-cps@3774.v4a_d648d409ce\">\n" +
+                "        <script>\n" +
                 "properties([\n" +
                 "    gitLabConnection('http://root:L8uX4Y3zsEstqPXAfy9o@192.168.56.1:80/viettel-vdt2023/tv360/login/tv360loginsourcecode'),\n" +
                 "    pipelineTriggers([\n" +
@@ -301,7 +346,7 @@ public class CentralizestorageController {
                 "                dir(\"depend\") {\n" +
                 "                    withKubeConfig([\n" +
                 "                        credentialsId: \"config-jenkins-k8s\",\n" +
-                "                        serverUrl: \"https://127.0.0.1:55861\"\n" +
+                "                        serverUrl: \"https://127.0.0.1:59653\"\n" +
                 "                    ]) {\n" +
                 "                        bat \"kubectl apply -f deployment.yaml\"\n" +
                 "                    }\n" +
@@ -309,11 +354,10 @@ public class CentralizestorageController {
                 "            }\n" +
                 "        }\n" +
                 "    }\n" +
-                "}\n" +
-                "    </script>\n" +
-                "    <sandbox>true</sandbox>\n" +
+                "}\n" +                "        </script>\n" +
+                "        <sandbox>true</sandbox>\n" +
                 "    </definition>\n" +
-                "    <triggers />\n" +
+                "    <triggers/>\n" +
                 "    <disabled>false</disabled>\n" +
                 "</flow-definition>";
         return jenkin_pipeline_script;

@@ -18,4 +18,6 @@ public class ServiceService {
     public void saveService(ServiceEntity serviceEntity){
         serviceRepository.save(serviceEntity);
     }
+
+
 }

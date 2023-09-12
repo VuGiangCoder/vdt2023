@@ -7,11 +7,9 @@ import com.viettel.vdt2023.gitlab.api.models.Group;
 import com.viettel.vdt2023.jenkins.api.JenkinsServer;
 import com.viettel.vdt2023.jenkins.api.JenkinsTriggerHelper;
 import com.viettel.vdt2023.jenkins.api.model.*;
+import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.apps.Deployment;
-import io.fabric8.kubernetes.client.DefaultKubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClient;
-import io.fabric8.kubernetes.client.KubernetesClientBuilder;
-import io.fabric8.kubernetes.client.KubernetesClientException;
+import io.fabric8.kubernetes.client.*;
 import io.fabric8.kubernetes.client.dsl.Resource;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -38,11 +36,8 @@ import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.*;
 
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
@@ -58,15 +53,15 @@ public class CiCdController {
     public void createJob() throws URISyntaxException, IOException, InterruptedException {
         JenkinsServer jenkins = new JenkinsServer(new URI("http://localhost:1234/"), "minhgiang89", "giang2010gc@");
         String filePathPro = "D:\\vdt2023\\src\\main\\resources\\configPro.xml";
-        String filePath = "D:\\vdt2023\\src\\main\\resources\\config.xml";
+        String filePath = "D:\\vdt2023\\src\\main\\resources\\tmp.xml";
         byte[] bytePro = Files.readAllBytes(Paths.get(filePathPro));
         String jobXmlPro = new String(bytePro);
         byte[] bytes = Files.readAllBytes(Paths.get(filePath));
         String jobXml = new String(bytes);
-        jenkins.createJob("hello-world14", jobXmlPro, true);
+        jenkins.createJob("hello-world14", jobXml, true);
         Job job = jenkins.getJob("hello-world14");
-        job.build(true);
-        //jenkins.updateJob("hello-world14",jobXml,true);
+        //job.build(true);
+//        jenkins.updateJob("hello-world14",jobXml,true);
     }
 
     @PostMapping("/delete")
@@ -132,6 +127,25 @@ public class CiCdController {
         } catch (IOException e) {
             System.out.println("Failed to fetch or parse JSON");
         }
+    }
+
+        @GetMapping("/get-port")
+    public String forwardPort(@RequestParam(name = "name") String name, @RequestParam(name = "port") int port, @RequestParam(name = "namespace")String namespace) {
+        final ConfigBuilder configBuilder = new ConfigBuilder();
+        try (KubernetesClient client = new KubernetesClientBuilder().withConfig(configBuilder.build()).build()) {
+            System.out.println("Using namespace: " + namespace);
+            Pod pod = client.pods().inNamespace(namespace).withName(name).get();
+            System.out.println(pod);
+            int containerPort = pod.getSpec().getContainers().get(0).getPorts().get(0).getContainerPort();
+            InetAddress inetAddress = InetAddress.getByAddress(new byte[]{127, 0, 0, 1});
+            LocalPortForward portForward = client.pods().inNamespace("default").withName(name).portForward(containerPort,
+                    inetAddress, port);
+            String mess = "Port forwarded for 60 seconds at http://127.0.0.1:" + portForward.getLocalPort();
+            return mess;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
 }

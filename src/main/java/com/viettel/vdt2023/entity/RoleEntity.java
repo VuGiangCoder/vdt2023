@@ -1,39 +1,25 @@
 package com.viettel.vdt2023.entity;
 
-import lombok.Getter;
+import jakarta.persistence.*;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static com.viettel.vdt2023.entity.Permission.*;
+@Entity
+@Table(name = "roles")
+public class RoleEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-@RequiredArgsConstructor
-public enum RoleEntity {
-    USER (Collections.emptySet()),
-    ADMIN(
-            Set.of(
-                    ADMIN_READ,
-                    ADMIN_UPDATE,
-                    ADMIN_DELETE,
-                    ADMIN_CREATE
-            )
-    );
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private ERole name;
 
-    @Getter
-    private final Set<Permission> permissions;
+    public RoleEntity() {
 
-    public List<SimpleGrantedAuthority> getAuthorities() {
-        var authorities = getPermissions()
-                .stream()
-                .map(permission -> new SimpleGrantedAuthority(permission.getPermission()))
-                .collect(Collectors.toList());
-        authorities.add(new SimpleGrantedAuthority("ROLE_" + this.name()));
-        return authorities;
     }
 
-
+    public RoleEntity(ERole name) {
+        this.name = name;
+    }
 }

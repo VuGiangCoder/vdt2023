@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.jvnet.hk2.annotations.Service;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 @Component
@@ -19,5 +21,9 @@ public class SystemService {
 
     public void saveSystem(SystemEntity systemEntity){
         systemRepository.save(systemEntity);
+    }
+
+    public List<SystemEntity> getAllSystem(){
+       return systemRepository.findAll();
     }
 }
