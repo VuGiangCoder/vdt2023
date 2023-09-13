@@ -11,7 +11,7 @@ import com.viettel.vdt2023.gitlab.api.models.Project;
 import com.viettel.vdt2023.gitlab.api.models.Visibility;
 import com.viettel.vdt2023.jenkins.api.JenkinsServer;
 import com.viettel.vdt2023.jenkins.api.model.Job;
-import com.viettel.vdt2023.jwt.JwtTokenProvider;
+import com.viettel.vdt2023.security.jwt.JwtUtils;
 import com.viettel.vdt2023.service.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,15 +44,13 @@ public class CentralizestorageController {
 
     @Autowired
     private final UserServiceService userServiceService;
-    JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
+
+    private final JwtUtils jwtUtils;
 
     @PostMapping("/api/create-system")
     public void createSystem(@RequestBody CreateSystemRequestEntity createSystemRequestEntity,
                              @RequestHeader("Authorization") String authToken) throws GitLabApiException {
         String token = authToken.substring(7);
-        if (!jwtTokenProvider.validateToken(token)) {
-            return;
-        }
         GitLabApi gitLabApi = GitLabApi.oauth2Login("http://192.168.56.1:80", "root",
                 "12345678");
         GroupApi groupApi = new GroupApi(gitLabApi);
@@ -63,7 +61,7 @@ public class CentralizestorageController {
         System.out.println(systemEntity);
         try {
             systemService.saveSystem(systemEntity);
-            String username = jwtTokenProvider.getUsernameFromJWT(token);
+            String username = jwtUtils.getUsernameFromJWT(token);
             UserEntity userEntity = userService.loadUserByUsername(username);
             System.out.println(userEntity.toString());
             UserSystemEntity userSystemEntity = new UserSystemEntity(null, userEntity, systemEntity, true);
@@ -78,7 +76,7 @@ public class CentralizestorageController {
     public void addMemberToSystem(@RequestBody AddMemberSystemRequestEntity addMemberSystemRequest,
                                   @RequestHeader("Authorization") String authToken) throws GitLabApiException {
         String token = authToken.substring(7);
-        String name = jwtTokenProvider.getUsernameFromJWT(token);
+        String name = jwtUtils.getUsernameFromJWT(token);
         UserEntity userEn = userService.loadUserByUsername(name);
         System.out.println(userEn);
         GitLabApi gitLabApi = GitLabApi.oauth2Login("http://192.168.56.1:80", "root",
@@ -110,7 +108,7 @@ public class CentralizestorageController {
     public String createService(@RequestBody CreateServiceRequestEntity createServiceRequestEntity,
                                 @RequestHeader("Authorization") String authToken) throws GitLabApiException {
         String token = authToken.substring(7);
-        if (!jwtTokenProvider.validateToken(token)) {
+        if (!jwtUtils.validateToken(token)) {
             return null;
         }
         String jenins_token = "11404cc9a1fd9088daf541b548fd6ac68b";
@@ -119,7 +117,7 @@ public class CentralizestorageController {
         GroupApi groupApi = new GroupApi(gitLabApi);
         ProjectApi projectApi = new ProjectApi(gitLabApi);
         SystemEntity systemEntity = systemService.loadSystemByName(createServiceRequestEntity.getParentGroupName());
-        String name = jwtTokenProvider.getUsernameFromJWT(token);
+        String name = jwtUtils.getUsernameFromJWT(token);
         UserEntity userEn = userService.loadUserByUsername(name);
         UserSystemEntity userSystemEntity = userSystemService.loadUserSystem(userEn, systemEntity);
         if (userSystemEntity == null) {
@@ -131,7 +129,7 @@ public class CentralizestorageController {
         try {
             ServiceEntity serviceEntity = new ServiceEntity(1L, createServiceRequestEntity.getName(), systemEntity, childGroup.getId());
             serviceService.saveService(serviceEntity);
-            String username = jwtTokenProvider.getUsernameFromJWT(token);
+            String username = jwtUtils.getUsernameFromJWT(token);
             UserEntity userEntity = userService.loadUserByUsername(username);
             System.out.println(userEntity.toString());
             try {
@@ -174,7 +172,7 @@ public class CentralizestorageController {
     public void addMemberToService(@RequestBody AddMemberServiceRequestEntity addMemberServiceRequest,
                                    @RequestHeader("Authorization") String authToken) throws GitLabApiException {
         String token = authToken.substring(7);
-        String name = jwtTokenProvider.getUsernameFromJWT(token);
+        String name = jwtUtils.getUsernameFromJWT(token);
         UserEntity userEn = userService.loadUserByUsername(name);
         System.out.println(userEn);
         GitLabApi gitLabApi = GitLabApi.oauth2Login("http://192.168.56.1:80", "root",
