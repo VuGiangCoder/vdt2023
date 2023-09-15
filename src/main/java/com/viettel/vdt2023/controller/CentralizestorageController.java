@@ -320,11 +320,13 @@ public class CentralizestorageController {
                 "        }\n" +
                 "        stage(\"Đẩy ảnh lên Docker Hub\") {\n" +
                 "            steps {\n" +
+                "                   dir(\"sourcecode\"){\n" + 
                 "                script {\n" +
                 "                    docker.withRegistry(\"\", registryCredential) {\n" +
                 "                        dockerImage.push()\n" +
                 "                    }\n" +
                 "                }\n" +
+                "              }\n" +
                 "            }\n" +
                 "        }\n" +
                 "        stage(\"Clone kho Git phụ thuộc\") {\n" +
@@ -344,7 +346,7 @@ public class CentralizestorageController {
                 "                dir(\"depend\") {\n" +
                 "                    withKubeConfig([\n" +
                 "                        credentialsId: \"config-jenkins-k8s\",\n" +
-                "                        serverUrl: \"https://127.0.0.1:59653\"\n" +
+                "                        serverUrl: \"https://127.0.0.1:59225\"\n" +
                 "                    ]) {\n" +
                 "                        bat \"kubectl apply -f deployment.yaml\"\n" +
                 "                    }\n" +

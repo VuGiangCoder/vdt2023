@@ -41,7 +41,7 @@ public class AuthController {
     JwtUtils jwtUtils;
 
     @PostMapping("/signin")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequestEntity loginRequest) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequestEntity loginRequest) {
 
         Authentication authentication = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
@@ -58,7 +58,7 @@ public class AuthController {
                 .ok(new JwtResponseEntity(jwt, userDetails.getId(), userDetails.getGitlabId(), userDetails.getUsername(), roles));
     }
     @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@RequestBody SignupRequestEntity signupRequest) {
+    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequestEntity signupRequest) {
         System.out.println(signupRequest);
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponseEntity("Error: Username is already taken!"));
