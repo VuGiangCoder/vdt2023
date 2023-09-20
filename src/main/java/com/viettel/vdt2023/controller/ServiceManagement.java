@@ -4,6 +4,7 @@ import com.viettel.vdt2023.entity.SystemEntity;
 import com.viettel.vdt2023.service.ServiceService;
 import com.viettel.vdt2023.service.SystemService;
 import com.viettel.vdt2023.service.UserService;
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,5 +26,11 @@ public class ServiceManagement {
     @GetMapping("/api/systems")
     public List<SystemEntity> getSystem() {
         return systemService.getAllSystem();
+    }
+
+    @GetMapping("/hello")
+    public String say(){
+        Dotenv dotenv = Dotenv.load();
+        return dotenv.get("hello");
     }
 }

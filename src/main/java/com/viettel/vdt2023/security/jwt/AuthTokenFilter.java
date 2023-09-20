@@ -1,10 +1,10 @@
 package com.viettel.vdt2023.security.jwt;
 
 import com.viettel.vdt2023.security.service.UserDetailsServiceImpl;
-import jakarta.servlet.FilterChain;
+import javax.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +27,19 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthTokenFilter.class);
 
+    private String parseJwt(HttpServletRequest request) {
+        String headerAuth = request.getHeader("Authorization");
+
+        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
+            return headerAuth.substring(7, headerAuth.length());
+        }
+
+        return null;
+    }
+
+
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, jakarta.servlet.http.HttpServletResponse response, jakarta.servlet.FilterChain filterChain) throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
             if (jwt != null && jwtUtils.validateToken(jwt)) {
@@ -48,16 +58,4 @@ public class AuthTokenFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
-    private String parseJwt(HttpServletRequest request) {
-        String headerAuth = request.getHeader("Authorization");
-
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7, headerAuth.length());
-        }
-
-        return null;
-    }
-
-
 }

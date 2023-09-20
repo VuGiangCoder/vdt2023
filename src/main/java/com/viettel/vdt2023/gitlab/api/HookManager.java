@@ -26,7 +26,7 @@ public interface HookManager {
      * Validate the provided secret token against the reference secret token. Returns true if
      * the secret token is valid or there is no reference secret token to validate against,
      * otherwise returns false.
-     * 
+     *
      * @param secretToken the token to validate
      * @return true if the secret token is valid or there is no reference secret token to validate against
      */
@@ -41,7 +41,7 @@ public interface HookManager {
      * Validate the provided secret token found in the HTTP header against the reference secret token.
      * Returns true if the secret token is valid or there is no reference secret token to validate
      * against, otherwise returns false.
-     * 
+     *
      * @param request the HTTP request to verify the secret token
      * @return true if the secret token is valid or there is no reference secret token to validate against
      */
@@ -58,7 +58,7 @@ public interface HookManager {
     /**
      * Parses and verifies an Event instance from the HTTP request and
      * fires it off to the registered listeners.
-     * 
+     *
      * @param request the HttpServletRequest to read the Event instance from
      * @throws GitLabApiException if the parsed event is not supported
      */

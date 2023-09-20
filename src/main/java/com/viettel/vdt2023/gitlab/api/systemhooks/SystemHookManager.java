@@ -44,25 +44,25 @@ public class SystemHookManager implements HookManager {
      */
     public SystemHookManager(String secretToken) {
         this.secretToken = secretToken;
-     }
+    }
 
-     /**
-      * Get the secret token that received hook events should be validated against.
-      *
-      * @return the secret token that received hook events should be validated against
-      */
-     public String getSecretToken() {
-         return (secretToken);
-     }
+    /**
+     * Get the secret token that received hook events should be validated against.
+     *
+     * @return the secret token that received hook events should be validated against
+     */
+    public String getSecretToken() {
+        return (secretToken);
+    }
 
-     /**
-      * Set the secret token that received hook events should be validated against.
-      *
-      * @param secretToken the secret token to verify against
-      */
-     public void setSecretToken(String secretToken) {
-         this.secretToken = secretToken;
-     }
+    /**
+     * Set the secret token that received hook events should be validated against.
+     *
+     * @param secretToken the secret token to verify against
+     */
+    public void setSecretToken(String secretToken) {
+        this.secretToken = secretToken;
+    }
 
     public void handleEvent(HttpServletRequest request) throws GitLabApiException {
         handleRequest(request);
@@ -173,7 +173,7 @@ public class SystemHookManager implements HookManager {
 
     /**
      * Verifies the provided Event and fires it off to the registered listeners.
-     * 
+     *
      * @param event the Event instance to handle
      * @throws GitLabApiException if the event is not supported
      */
@@ -209,7 +209,7 @@ public class SystemHookManager implements HookManager {
 
     /**
      * Fire the event to the registered listeners.
-     * 
+     *
      * @param event the SystemHookEvent instance to fire to the registered event listeners
      * @throws GitLabApiException if the event is not supported
      */
